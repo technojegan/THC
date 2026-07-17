@@ -179,13 +179,19 @@
   .desktop-nav button.active{color:var(--gold-bright);background:var(--card-2);}
   .desktop-nav button:hover{color:var(--text);}
 
+  .chart-grid{display:block;}
+
   /* ============ RESPONSIVE: tablet & desktop ============ */
   @media (min-width: 760px){
-    .app{max-width:1180px;padding-bottom:40px;}
-    .topbar{padding:22px 40px 8px;}
-    .desktop-nav{display:flex;gap:6px;}
+    .app{max-width:1180px;width:100%;padding-bottom:40px;}
+    .topbar{padding:22px 40px 14px;border-bottom:1px solid var(--border);}
+    .topbar .pagelabel{display:none;}
+    .desktop-nav{display:flex;gap:6px;padding:12px 40px 14px;border-bottom:1px solid var(--border);margin-bottom:24px;}
     .bottomnav{display:none;}
     .page{padding:0 40px 10px;}
+
+    /* narrow, form-like pages read better centered than stretched full width */
+    #page-settings{max-width:600px;margin:0 auto;}
 
     /* Home: hero + icon row + social side by side, feed below in a grid */
     #page-home{display:grid;grid-template-columns:340px 1fr;gap:32px;align-items:start;}
@@ -199,8 +205,15 @@
     #page-home #homeFeed{grid-column:2;}
     #page-home .pill-toggle{grid-row:1;margin-top:0;}
 
+    .pill-toggle{max-width:340px;}
+
     #homeFeed, #sigFeed{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
     .signal-card{margin-bottom:0;}
+
+    /* Past Signals: stats in one row, charts side by side */
+    #page-pastsignals .statgrid{grid-template-columns:repeat(4,1fr);}
+    .chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+    .chart-grid .form-card{margin-bottom:0;}
 
     .compact-row, .compact-header{font-size:13.5px;}
 
@@ -318,13 +331,15 @@
       <div><div class="lbl">Total % P&amp;L</div><div class="val" id="pfTotalPl">0%</div></div>
       <div><div class="lbl">Avg % / Trade</div><div class="val" id="pfAvg">0%</div></div>
     </div>
-    <div class="form-card">
-      <h3 style="margin:0 0 12px;font-size:14px;color:var(--text-muted);font-weight:500;">Win / Loss / Open</h3>
-      <canvas id="pieChart" height="180"></canvas>
-    </div>
-    <div class="form-card">
-      <h3 style="margin:0 0 12px;font-size:14px;color:var(--text-muted);font-weight:500;">Cumulative % P&amp;L</h3>
-      <canvas id="lineChart" height="180"></canvas>
+    <div class="chart-grid">
+      <div class="form-card">
+        <h3 style="margin:0 0 12px;font-size:14px;color:var(--text-muted);font-weight:500;">Win / Loss / Open</h3>
+        <canvas id="pieChart" height="180"></canvas>
+      </div>
+      <div class="form-card">
+        <h3 style="margin:0 0 12px;font-size:14px;color:var(--text-muted);font-weight:500;">Cumulative % P&amp;L</h3>
+        <canvas id="lineChart" height="180"></canvas>
+      </div>
     </div>
     <div id="pastFeed"></div>
   </section>
