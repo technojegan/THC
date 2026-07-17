@@ -35,11 +35,15 @@
       <div class="home-col-left">
         <div class="hero-card">
           <div class="row1">
-            <div>Overall Performance</div>
+            <div>Call Accuracy</div>
             <div class="brandchip">TH</div>
           </div>
-          <div class="amount mono" id="heroTotalPl">0.0%</div>
-          <div class="row2"><span>Total % P&amp;L · all signals</span><span class="synced">● Synced</span></div>
+          <div class="amount mono" id="heroWinRate">0%</div>
+          <div class="hero-substats">
+            <div><div class="v mono" id="heroTotalSignals">0</div><div class="l">Signals Called</div></div>
+            <div><div class="v mono" id="heroTotalPl">0.0%</div><div class="l">Total % P&amp;L</div></div>
+          </div>
+          <div class="row2"><span>Every call logged — wins and losses alike</span><span class="synced">● Synced</span></div>
         </div>
 
         <div class="icon-row">
@@ -72,22 +76,23 @@
       </div>
 
       <div class="home-col-right">
+        <div class="section-eyebrow">Track Record</div>
+        <div id="homeRecent"></div>
+        <button class="viewall-link" data-goto="pastsignals">View full track record →</button>
         <div class="promo" id="homePromo"></div>
-        <div class="pill-toggle" id="homeToggle">
-          <button data-t="ongoing" class="active">Ongoing</button>
-          <button data-t="past">Past</button>
-        </div>
-        <div id="homeFeed" class="feed-grid"></div>
       </div>
     </section>
 
     <!-- ============ SIGNALS ============ -->
     <section class="page" id="page-signals">
-      <div class="pill-toggle" id="sigToggle">
-        <button data-t="ongoing" class="active">Ongoing</button>
-        <button data-t="past">Past</button>
-      </div>
-      <div id="sigFeed" class="feed-grid"></div>
+      <div class="section-title">Signals</div>
+      <div class="section-sub">Live desk calls, updated as trades progress.</div>
+
+      <div class="section-eyebrow">Ongoing</div>
+      <div id="sigOngoingFeed" class="feed-grid"></div>
+
+      <div class="section-eyebrow section-eyebrow-spaced">Past</div>
+      <div id="sigPastList"></div>
     </section>
 
     <!-- ============ PAST SIGNALS ============ -->

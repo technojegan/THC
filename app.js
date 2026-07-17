@@ -254,8 +254,6 @@ let signalsCache = [];
 let subscribersCache = [];
 let subscriberSession = null;
 let adminSession = false;
-let currentHomeTab = 'ongoing';
-let currentSigTab = 'ongoing';
 let pieChart, lineChart;
 
 async function refreshData(){
@@ -264,12 +262,28 @@ async function refreshData(){
 }
 
 // ---------------- render ----------------
+function renderCompactList(elId, closedSignals, emptyMsg){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  el.innerHTML = closedSignals.length
+    ? '<div class="compact-list"><div class="compact-header"><div class="c-col c-name">Instrument</div><div class="c-col">Entry</div><div class="c-col">Exit</div><div class="c-col">P&amp;L %</div><div class="c-col c-pill">Result</div></div>' + closedSignals.map(compactClosedRowHTML).join('') + '</div>'
+    : `<div class="miniempty">${emptyMsg}</div>`;
+}
+
+function renderCardFeed(elId, list, emptyMsg){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  el.innerHTML = list.length ? list.map(signalCardHTML).join('') : `<div class="miniempty">${emptyMsg}</div>`;
+}
+
 function renderAll(){
   const stats = computeStats(signalsCache);
 
-  const heroEl = document.getElementById('heroTotalPl');
-  heroEl.textContent = fmtPct(stats.totalPl);
-  heroEl.style.color = stats.totalPl >= 0 ? 'var(--gold-bright)' : 'var(--red)';
+  document.getElementById('heroWinRate').textContent = fmtPct(stats.winRate);
+  document.getElementById('heroTotalSignals').textContent = stats.total;
+  const heroPlEl = document.getElementById('heroTotalPl');
+  heroPlEl.textContent = fmtPct(stats.totalPl);
+  heroPlEl.style.color = stats.totalPl >= 0 ? 'var(--gold-bright)' : 'var(--red)';
 
   const promo = document.getElementById('homePromo');
   if(subscriberSession){
@@ -281,12 +295,15 @@ function renderAll(){
   const openSignals = signalsCache.filter(s => s.sell === undefined || s.sell === null);
   const closedSignals = signalsCache.filter(s => s.sell !== undefined && s.sell !== null).slice().reverse();
 
-  renderFeed('homeFeed', currentHomeTab, openSignals, closedSignals);
-  renderFeed('sigFeed', currentSigTab, openSignals, closedSignals);
+  // Home: a handful of recent results as proof of the accuracy claim above
+  renderCompactList('homeRecent', closedSignals.slice(0,4), 'No closed calls yet.');
 
-  document.getElementById('pastFeed').innerHTML = closedSignals.length
-    ? '<div class="compact-list"><div class="compact-header"><div class="c-col c-name">Instrument</div><div class="c-col">Entry</div><div class="c-col">Exit</div><div class="c-col">P&amp;L %</div><div class="c-col c-pill">Result</div></div>' + closedSignals.map(compactClosedRowHTML).join('') + '</div>'
-    : '<div class="miniempty">No closed signals yet.</div>';
+  // Signals: ongoing on top as full cards, past below as a plain list -- no tabs
+  renderCardFeed('sigOngoingFeed', openSignals, 'No ongoing signals yet.');
+  renderCompactList('sigPastList', closedSignals, 'No closed signals yet.');
+
+  // Past Signals: the full track record with stats + charts
+  renderCompactList('pastFeed', closedSignals, 'No closed signals yet.');
 
   document.getElementById('pfTotal').textContent = stats.total;
   document.getElementById('pfWinRate').textContent = fmtPct(stats.winRate);
@@ -299,14 +316,6 @@ function renderAll(){
   ).join('') || '<tr><td colspan="2" class="miniempty">No subscribers yet</td></tr>';
 
   renderCharts(stats);
-}
-
-function renderFeed(elId, tab, openSignals, closedSignals){
-  const el = document.getElementById(elId);
-  if(!el) return;
-  const list = tab === 'ongoing' ? openSignals : closedSignals;
-  if(!list.length){ el.innerHTML = `<div class="miniempty">No ${tab} signals yet.</div>`; return; }
-  el.innerHTML = list.map(signalCardHTML).join('');
 }
 
 function renderCharts(stats){
@@ -432,18 +441,6 @@ function wireEvents(){
     if(navBtn){ goTo(navBtn.getAttribute('data-page')); return; }
     const gotoBtn = e.target.closest('[data-goto]');
     if(gotoBtn){ goTo(gotoBtn.getAttribute('data-goto')); return; }
-  });
-  document.getElementById('homeToggle').querySelectorAll('button').forEach(b => {
-    b.addEventListener('click', () => {
-      document.getElementById('homeToggle').querySelectorAll('button').forEach(x => x.classList.remove('active'));
-      b.classList.add('active'); currentHomeTab = b.dataset.t; renderAll();
-    });
-  });
-  document.getElementById('sigToggle').querySelectorAll('button').forEach(b => {
-    b.addEventListener('click', () => {
-      document.getElementById('sigToggle').querySelectorAll('button').forEach(x => x.classList.remove('active'));
-      b.classList.add('active'); currentSigTab = b.dataset.t; renderAll();
-    });
   });
   document.getElementById('registerBtn').addEventListener('click', registerSubscriber);
   document.getElementById('subscriberLogoutBtn').addEventListener('click', subscriberLogout);
