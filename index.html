@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
     --bg:#000000;
@@ -50,10 +51,6 @@
   .pill-toggle button{flex:1;border:none;background:none;color:var(--text-muted);padding:12px 0;border-radius:999px;font-weight:600;font-size:14.5px;}
   .pill-toggle button.active{background:var(--gold);color:#000;}
 
-  .chip-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;margin-bottom:16px;}
-  .chip-row::-webkit-scrollbar{display:none;}
-  .chip{flex:none;padding:10px 18px;border-radius:999px;border:1px solid var(--border);color:var(--text-muted);font-size:13.5px;font-weight:600;background:var(--card-2);}
-  .chip.active{background:var(--gold);color:#000;border-color:var(--gold);}
 
   /* ---- hero card ---- */
   .hero-card{
@@ -173,27 +170,53 @@
   td{padding:9px 4px;border-bottom:1px solid var(--border);}
   .miniempty{color:var(--text-muted);font-size:13px;padding:20px 0;text-align:center;}
 
-  /* ---- desktop nav (hidden on mobile) ---- */
+  /* ---- top nav (merged into the top bar; hidden on mobile, shown from tablet up) ---- */
   .desktop-nav{display:none;}
-  .desktop-nav button{background:none;border:none;color:var(--text-muted);font-size:14px;font-weight:600;padding:8px 16px;border-radius:8px;}
+  .desktop-nav button{background:none;border:none;color:var(--text-muted);font-size:14px;font-weight:600;padding:8px 16px;border-radius:8px;cursor:pointer;}
   .desktop-nav button.active{color:var(--gold-bright);background:var(--card-2);}
   .desktop-nav button:hover{color:var(--text);}
 
   .chart-grid{display:block;}
+  .form-card + .form-card{margin-top:0;}
 
-  /* ============ RESPONSIVE: tablet & desktop ============ */
-  @media (min-width: 760px){
-    .app{max-width:1180px;width:100%;padding-bottom:40px;}
-    .topbar{padding:22px 40px 14px;border-bottom:1px solid var(--border);}
+  /* ==================================================================
+     RESPONSIVE — mobile-first. Two upward breakpoints: tablet (>=600px)
+     and desktop (>=1024px). Below 600px this is unchanged from the
+     original single-column mobile-app layout.
+     ================================================================== */
+
+  /* ---- Tablet: real top nav bar replaces the bottom tab bar; feed
+         cards start reflowing into a grid instead of one long column ---- */
+  @media (min-width: 600px){
+    .app{max-width:720px;padding-bottom:36px;}
+    .topbar{position:sticky;top:0;z-index:10;background:var(--bg);padding:18px 32px;border-bottom:1px solid var(--border);}
     .topbar .pagelabel{display:none;}
-    .desktop-nav{display:flex;gap:6px;padding:12px 40px 14px;border-bottom:1px solid var(--border);margin-bottom:24px;}
+    .desktop-nav{display:flex;gap:6px;}
     .bottomnav{display:none;}
-    .page{padding:0 40px 10px;}
+    .page{padding:0 32px 10px;}
+
+    .pill-toggle{max-width:340px;}
+
+    #homeFeed, #sigFeed{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
+    .signal-card{margin-bottom:0;}
 
     /* narrow, form-like pages read better centered than stretched full width */
-    #page-settings{max-width:600px;margin:0 auto;}
+    #page-settings{max-width:520px;margin:0 auto;}
 
-    /* Home: hero + icon row + social side by side, feed below in a grid */
+    /* Past Signals: stats in one row, charts side by side */
+    #page-pastsignals .statgrid{grid-template-columns:repeat(4,1fr);}
+    .chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+    .chart-grid .form-card{margin-bottom:0;}
+
+    .compact-row, .compact-header{font-size:13.5px;}
+  }
+
+  /* ---- Desktop: Home splits into a sidebar + feed layout, wider canvas ---- */
+  @media (min-width: 1024px){
+    .app{max-width:1180px;}
+    .topbar{padding:22px 40px;}
+    .page{padding:0 40px 10px;}
+
     #page-home{display:grid;grid-template-columns:340px 1fr;gap:32px;align-items:start;}
     #page-home .hero-card,
     #page-home .icon-row,
@@ -205,25 +228,8 @@
     #page-home #homeFeed{grid-column:2;}
     #page-home .pill-toggle{grid-row:1;margin-top:0;}
 
-    .pill-toggle{max-width:340px;}
-
-    #homeFeed, #sigFeed{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
-    .signal-card{margin-bottom:0;}
-
-    /* Past Signals: stats in one row, charts side by side */
-    #page-pastsignals .statgrid{grid-template-columns:repeat(4,1fr);}
-    .chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
-    .chart-grid .form-card{margin-bottom:0;}
-
-    .compact-row, .compact-header{font-size:13.5px;}
-
-    #page-admin .grid,
-    .form-card + .form-card{margin-top:0;}
-    .grid{gap:24px;}
-  }
-
-  @media (min-width: 1100px){
-    #homeFeed, #sigFeed{grid-template-columns:repeat(3,1fr);}
+    #page-settings{max-width:600px;}
+    #homeFeed, #sigFeed{grid-template-columns:repeat(auto-fill,minmax(300px,1fr));}
   }
 
   /* ---- compact past-signal rows (5 cols) ---- */
@@ -254,14 +260,13 @@
         <div class="logo-sub">T H C &nbsp;·&nbsp; LIVE DESK</div>
       </div>
     </div>
+    <div class="desktop-nav">
+      <button data-page="home" class="active">Home</button>
+      <button data-page="signals">Signals</button>
+      <button data-page="pastsignals">Past Signals</button>
+      <button data-page="settings">Settings</button>
+    </div>
     <div class="pagelabel" id="topTitle">Home</div>
-  </div>
-
-  <div class="desktop-nav">
-    <button data-page="home" class="active">Home</button>
-    <button data-page="signals">Signals</button>
-    <button data-page="pastsignals">Past Signals</button>
-    <button data-page="settings">Settings</button>
   </div>
 
   <!-- ============ HOME ============ -->
@@ -438,21 +443,60 @@ const SEED_SIGNALS = [
 ];
 
 // ---------------- storage ----------------
+// Shared backend (optional): create a free project at supabase.com, run this SQL once:
+//   create table kv_store (key text primary key, value jsonb not null, updated_at timestamptz default now());
+//   alter table kv_store enable row level security;
+//   create policy "public read"   on kv_store for select using (true);
+//   create policy "public write"  on kv_store for insert with check (true);
+//   create policy "public update" on kv_store for update using (true);
+// then paste the project URL + anon key below. Until then, this runs entirely on
+// localStorage (per-browser) and always falls back to SEED_SIGNALS if storage is empty.
+const SUPABASE_URL = '';
+const SUPABASE_ANON_KEY = '';
+let supabaseClient = null;
+try{
+  if(SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase){
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }
+}catch(e){ supabaseClient = null; }
+
+async function kvGet(key){
+  if(supabaseClient){
+    try{
+      const { data, error } = await supabaseClient.from('kv_store').select('value').eq('key', key).maybeSingle();
+      if(!error && data) return data.value;
+    }catch(e){}
+  }
+  try{
+    const raw = localStorage.getItem(key);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return null;
+}
+async function kvSet(key, value){
+  try{ localStorage.setItem(key, JSON.stringify(value)); }catch(e){}
+  if(supabaseClient){
+    try{ await supabaseClient.from('kv_store').upsert({ key, value }); }catch(e){}
+  }
+}
+
 async function loadSignals(){
   try{
-    const r = await window.storage.get('thc_signals', true);
-    if(r) return JSON.parse(r.value);
+    const v = await kvGet('thc_signals');
+    if(Array.isArray(v) && v.length) return v;
   }catch(e){}
-  // first run: seed with the real desk history
-  await saveSignals(SEED_SIGNALS);
+  try{ await saveSignals(SEED_SIGNALS); }catch(e){}
   return SEED_SIGNALS;
 }
-async function saveSignals(list){ await window.storage.set('thc_signals', JSON.stringify(list), true); }
+async function saveSignals(list){ try{ await kvSet('thc_signals', list); }catch(e){} }
 async function loadSubscribers(){
-  try{ const r = await window.storage.get('thc_subscribers', true); return r ? JSON.parse(r.value) : []; }
-  catch(e){ return []; }
+  try{
+    const v = await kvGet('thc_subscribers');
+    if(Array.isArray(v)) return v;
+  }catch(e){}
+  return [];
 }
-async function saveSubscribers(list){ await window.storage.set('thc_subscribers', JSON.stringify(list), true); }
+async function saveSubscribers(list){ try{ await kvSet('thc_subscribers', list); }catch(e){} }
 
 // ---------------- parsing ----------------
 function parseSignalText(text){
