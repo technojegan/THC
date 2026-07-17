@@ -12,7 +12,7 @@
   --red-dim:rgba(229,72,77,.15);
 }
 *{box-sizing:border-box;}
-html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;overflow-x:hidden;}
 h1,h2,h3{font-family:'Inter',sans-serif;margin:0;}
 button,input,select,textarea{font-family:inherit;}
 button{cursor:pointer;}
@@ -224,14 +224,17 @@ td{padding:9px 4px;border-bottom:1px solid var(--border);}
   .topbar{padding:22px 40px;}
   .page{padding:0 40px 16px;}
 
-  #page-home{display:grid;grid-template-columns:340px 1fr;gap:32px;align-items:start;}
-  .home-col-left{max-width:none;margin:0;}
+  #page-home.active{display:grid;grid-template-columns:340px 1fr;gap:32px;align-items:start;}
+  /* min-width:0 overrides the grid item's default min-width:auto, which would
+     otherwise let the insta-strip's non-wrapping content force this column
+     wider than 340px instead of clipping/scrolling within it. */
+  .home-col-left{max-width:none;margin:0;min-width:0;}
   .home-col-right{min-width:0;}
 
   .feed-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
   .signal-card{margin-bottom:0;}
 
-  #page-settings{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start;}
-  .settings-col-left, .settings-col-right{max-width:none;margin:0;}
+  #page-settings.active{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start;}
+  .settings-col-left, .settings-col-right{max-width:none;margin:0;min-width:0;}
   .admin-label{margin-top:0;padding-top:0;border-top:none;}
 }
